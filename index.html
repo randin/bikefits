@@ -309,9 +309,16 @@
 
     /* Right panel: Output & Comparison */
     .comparison-container {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 1.5rem;
+    }
+
+    @media (min-width: 1200px) {
+      .comparison-container {
+        grid-template-columns: 1fr 1.1fr;
+        align-items: start;
+      }
     }
 
     /* Empty state */
@@ -1010,37 +1017,92 @@
 
       const bikeUrl = generateBikeGeoCalcUrl();
 
+      // Calculate dynamic bounds to fit the canvas perfectly
+      let minX = Infinity;
+      let maxX = -Infinity;
+      const minY = 0;
+      let maxY = -Infinity;
+
+      const activeBikes = [];
+      if (bikeA) activeBikes.push(bikeA.data);
+      if (bikeB) activeBikes.push(bikeB.data);
+
+      activeBikes.forEach(bike => {
+        const getVal = (k) => bike[k] !== undefined ? bike[k] : DEFAULT_GEOMETRY[k];
+        const bbX = getVal('bottomBracketX');
+        const bbY = getVal('bottomBracketY');
+        const rHubX = getVal('backHubX');
+        const rHubY = getVal('hubY');
+        const fHubX = getVal('frontHubX');
+        const fHubY = getVal('hubY');
+        const stTopX = getVal('seatTubeTopCenterX');
+        const stTopY = getVal('seatTubeTopCenterY');
+        const htTopX = getVal('headTubeTopCenterX');
+        const htTopY = getVal('headTubeTopCenterY');
+        const htBotX = getVal('headTubeBottomCenterX');
+        const htBotY = getVal('headTubeBottomCenterY');
+        const hbX = getVal('handlebarBackX');
+        const hbY = getVal('handlebarTopY');
+        const hoodsX = getVal('hoodsRestTopX');
+        const hoodsY = getVal('hoodsRestTopY');
+        const saddleBackX = getVal('saddleBackX');
+        const saddleBackY = getVal('saddleTopY');
+        const r = getVal('wheelRadius');
+
+        const xVals = [bbX, rHubX - r, rHubX + r, fHubX - r, fHubX + r, stTopX, htTopX, htBotX, hbX, hoodsX, saddleBackX];
+        const yVals = [bbY, rHubY + r, fHubY + r, stTopY, htTopY, htBotY, hbY, hoodsY, saddleBackY];
+
+        xVals.forEach(x => {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+        });
+        yVals.forEach(y => {
+          if (y > maxY) maxY = y;
+        });
+      });
+
+      // Add safety margins
+      const bounds = {
+        minX: minX - 40,
+        maxX: maxX + 40,
+        minY: 0,
+        maxY: maxY + 40
+      };
+
       if (bikeA && !bikeB) {
         // Single Bike View
         detailsPanel.innerHTML = `
           <div class="comparison-container">
-            <!-- Action bar with link -->
-            <div class="action-bar">
-              <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Open in BikeGeoCalc</h4>
-              <div class="link-container">
-                <span class="link-text" id="generated-url">${bikeUrl}</span>
+            <!-- Left side of details: Canvas + Actions -->
+            <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
+              <!-- Live Canvas Visual Overlay -->
+              <div class="canvas-panel">
+                <div class="canvas-legend">
+                  <div class="legend-item"><span class="legend-color legend-a"></span> ${escapeHtml(bikeA.name)}</div>
+                </div>
+                <canvas id="bike-canvas" width="800" height="500"></canvas>
               </div>
-              <div class="button-group">
-                <button class="btn btn-primary" onclick="window.open('${bikeUrl}', '_blank')">
-                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-                  Open BikeGeoCalc
-                </button>
-                <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
-                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                  Copy Link
-                </button>
+              
+              <!-- Action bar with link -->
+              <div class="action-bar">
+                <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Open in BikeGeoCalc</h4>
+                <div class="link-container">
+                  <span class="link-text" id="generated-url">${bikeUrl}</span>
+                </div>
+                <div class="button-group">
+                  <button class="btn btn-primary" onclick="window.open('${bikeUrl}', '_blank')">
+                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                    Open BikeGeoCalc
+                  </button>
+                  <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
+                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    Copy Link
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Live Canvas Visual Overlay -->
-            <div class="canvas-panel">
-              <div class="canvas-legend">
-                <div class="legend-item"><span class="legend-color legend-a"></span> ${escapeHtml(bikeA.name)}</div>
-              </div>
-              <canvas id="bike-canvas" width="800" height="500"></canvas>
-            </div>
-
-            <!-- Comparison Table -->
+            <!-- Right side of details: Table -->
             <div class="table-container">
               <table>
                 <thead>
@@ -1099,41 +1161,44 @@
         const canvas = document.getElementById('bike-canvas');
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height);
+        drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height, bounds);
         return;
       }
 
       // We have both bikes!
       detailsPanel.innerHTML = `
         <div class="comparison-container">
-          <!-- Action bar with link -->
-          <div class="action-bar">
-            <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Compare in BikeGeoCalc</h4>
-            <div class="link-container">
-              <span class="link-text" id="generated-url">${bikeUrl}</span>
+          <!-- Left side of details: Canvas + Actions -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
+            <!-- Live Canvas Visual Overlay -->
+            <div class="canvas-panel">
+              <div class="canvas-legend">
+                <div class="legend-item"><span class="legend-color legend-a"></span> ${escapeHtml(bikeA.name)}</div>
+                <div class="legend-item"><span class="legend-color legend-b"></span> ${escapeHtml(bikeB.name)}</div>
+              </div>
+              <canvas id="bike-canvas" width="800" height="500"></canvas>
             </div>
-            <div class="button-group">
-              <button class="btn btn-primary" onclick="window.open('${bikeUrl}', '_blank')">
-                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-                Open BikeGeoCalc
-              </button>
-              <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
-                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                Copy Link
-              </button>
+            
+            <!-- Action bar with link -->
+            <div class="action-bar">
+              <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Compare in BikeGeoCalc</h4>
+              <div class="link-container">
+                <span class="link-text" id="generated-url">${bikeUrl}</span>
+              </div>
+              <div class="button-group">
+                <button class="btn btn-primary" onclick="window.open('${bikeUrl}', '_blank')">
+                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                  Open BikeGeoCalc
+                </button>
+                <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
+                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                  Copy Link
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Live Canvas Visual Overlay -->
-          <div class="canvas-panel">
-            <div class="canvas-legend">
-              <div class="legend-item"><span class="legend-color legend-a"></span> ${escapeHtml(bikeA.name)}</div>
-              <div class="legend-item"><span class="legend-color legend-b"></span> ${escapeHtml(bikeB.name)}</div>
-            </div>
-            <canvas id="bike-canvas" width="800" height="500"></canvas>
-          </div>
-
-          <!-- Comparison Table -->
+          <!-- Right side of details: Table -->
           <div class="table-container">
             <table>
               <thead>
@@ -1197,8 +1262,8 @@
       
       // Draw Bike A and Bike B overlayed
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height); // cyan
-      drawBike(ctx, bikeB.data, '#ec4899', canvas.width, canvas.height); // pink
+      drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height, bounds); // cyan
+      drawBike(ctx, bikeB.data, '#ec4899', canvas.width, canvas.height, bounds); // pink
     }
 
     // Render Table Row
@@ -1264,24 +1329,19 @@
     }
 
     // Canvas Draw Routine
-    function drawBike(ctx, bike, color, canvasWidth, canvasHeight, padding = 35) {
-      // Coordinate System Bounding box of typical bike:
-      // X: from backHubX - wheelRadius (approx 0) to frontHubX + wheelRadius (approx 1670)
-      // Y: from 0 (ground) to max of saddleTopY, hoodsRestTopY, etc. (approx 1100)
-      const minX = 0;
-      const maxX = 1720;
-      const minY = 0;
-      const maxY = 1100;
+    function drawBike(ctx, bike, color, canvasWidth, canvasHeight, bounds) {
+      const { minX, maxX, minY, maxY } = bounds;
 
       const bikeWidth = maxX - minX;
       const bikeHeight = maxY - minY;
 
+      const padding = 25; // Canvas inner padding
       const scaleX = (canvasWidth - 2 * padding) / bikeWidth;
       const scaleY = (canvasHeight - 2 * padding) / bikeHeight;
       const scale = Math.min(scaleX, scaleY);
 
       // Center the bike horizontally and bottom-align it on the canvas
-      const offsetX = padding + (canvasWidth - 2 * padding - bikeWidth * scale) / 2;
+      const offsetX = padding + (canvasWidth - 2 * padding - bikeWidth * scale) / 2 - minX * scale;
       const offsetY = canvasHeight - padding;
 
       // Helper to convert bike coords to canvas coords
@@ -1292,17 +1352,20 @@
       if (color === '#06b6d4') {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
         ctx.lineWidth = 1;
-        // Draw vertical grid lines
-        for (let x = 100; x < maxX; x += 100) {
+        
+        // Draw vertical grid lines at 100mm increments
+        const startGridX = Math.floor(minX / 100) * 100;
+        for (let x = startGridX; x < maxX; x += 100) {
           ctx.beginPath();
           ctx.moveTo(toCanvasX(x), toCanvasY(0));
           ctx.lineTo(toCanvasX(x), toCanvasY(maxY));
           ctx.stroke();
         }
-        // Draw horizontal grid lines
+        
+        // Draw horizontal grid lines at 100mm increments
         for (let y = 100; y < maxY; y += 100) {
           ctx.beginPath();
-          ctx.moveTo(toCanvasX(0), toCanvasY(y));
+          ctx.moveTo(toCanvasX(minX), toCanvasY(y));
           ctx.lineTo(toCanvasX(maxX), toCanvasY(y));
           ctx.stroke();
         }
@@ -1311,7 +1374,7 @@
         ctx.beginPath();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1.5;
-        ctx.moveTo(toCanvasX(0), toCanvasY(0));
+        ctx.moveTo(toCanvasX(minX), toCanvasY(0));
         ctx.lineTo(toCanvasX(maxX), toCanvasY(0));
         ctx.stroke();
       }
