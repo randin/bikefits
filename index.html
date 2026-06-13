@@ -913,13 +913,18 @@
 
     // Select Bike
     function selectBike(bike) {
-      const indexA = selectedBikes.findIndex(b => b && b.fileName === bike.fileName);
-      
-      if (indexA !== -1) {
-        // If already selected, deselect it
-        selectedBikes[indexA] = null;
+      const isA = selectedBikes[0] && selectedBikes[0].fileName === bike.fileName;
+      const isB = selectedBikes[1] && selectedBikes[1].fileName === bike.fileName;
+
+      if (isA) {
+        // Deselect Bike A, promote Bike B to Bike A
+        selectedBikes[0] = selectedBikes[1];
+        selectedBikes[1] = null;
+      } else if (isB) {
+        // Deselect Bike B
+        selectedBikes[1] = null;
       } else {
-        // Find empty slot or rotate oldest out
+        // Select new bike
         if (selectedBikes[0] === null) {
           selectedBikes[0] = bike;
         } else if (selectedBikes[1] === null) {
@@ -991,25 +996,114 @@
       const bikeA = selectedBikes[0];
       const bikeB = selectedBikes[1];
 
-      // If less than 2 selected, show instruction
-      if (!bikeA || !bikeB) {
-        let countText = 'Select two bike configurations from the list';
-        if (bikeA) countText = `Selected "<b>${escapeHtml(bikeA.name)}</b>". Select one more configuration to start comparison.`;
-        if (bikeB) countText = `Selected "<b>${escapeHtml(bikeB.name)}</b>". Select one more configuration to start comparison.`;
-
+      // If no bikes are selected, show empty state
+      if (!bikeA && !bikeB) {
         detailsPanel.innerHTML = `
           <div class="empty-state">
             <svg class="empty-state-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            <h3>Comparison Dashboard</h3>
-            <p>${countText}</p>
+            <h3>Explorer Dashboard</h3>
+            <p>Select one or two bike configurations from the list</p>
           </div>
         `;
         return;
       }
 
-      // We have both bikes!
       const bikeUrl = generateBikeGeoCalcUrl();
 
+      if (bikeA && !bikeB) {
+        // Single Bike View
+        detailsPanel.innerHTML = `
+          <div class="comparison-container">
+            <!-- Action bar with link -->
+            <div class="action-bar">
+              <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Open in BikeGeoCalc</h4>
+              <div class="link-container">
+                <span class="link-text" id="generated-url">${bikeUrl}</span>
+              </div>
+              <div class="button-group">
+                <button class="btn btn-primary" onclick="window.open('${bikeUrl}', '_blank')">
+                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                  Open BikeGeoCalc
+                </button>
+                <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
+                  <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                  Copy Link
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Canvas Visual Overlay -->
+            <div class="canvas-panel">
+              <div class="canvas-legend">
+                <div class="legend-item"><span class="legend-color legend-a"></span> ${escapeHtml(bikeA.name)}</div>
+              </div>
+              <canvas id="bike-canvas" width="800" height="500"></canvas>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Geometry Dimension</th>
+                    <th class="val-a">${escapeHtml(bikeA.name)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Fit Specs -->
+                  <tr><td colspan="2" class="row-category">Core Fit specs</td></tr>
+                  ${renderTableRow('Stack', 'stack', 'mm', true)}
+                  ${renderTableRow('Reach', 'reach', 'mm', true)}
+                  ${renderTableRow('Saddle Top Height (Y)', 'saddleTopY', 'mm', true)}
+                  ${renderTableRow('Saddle Back setback (X)', 'saddleBackX', 'mm', true)}
+                  ${renderTableRow('Handlebar Back clamp (X)', 'handlebarBackX', 'mm', true)}
+                  ${renderTableRow('Handlebar Top height (Y)', 'handlebarTopY', 'mm', true)}
+                  ${renderTableRow('Hoods Top Rest (X)', 'hoodsRestTopX', 'mm', true)}
+                  ${renderTableRow('Hoods Top Rest (Y)', 'hoodsRestTopY', 'mm', true)}
+
+                  <!-- Frame Specs -->
+                  <tr><td colspan="2" class="row-category">Frame geometry</td></tr>
+                  ${renderTableRow('Head Tube Angle', 'headTubeAngle', '°')}
+                  ${renderTableRow('Seat Tube Angle', 'seatTubeAngle', '°')}
+                  ${renderTableRow('Bottom Bracket Drop', 'bottomBracketDrop', 'mm')}
+                  ${renderTableRow('Chainstay Length', 'chainStayLength', 'mm')}
+                  ${renderTableRow('Wheelbase', 'wheelBase', 'mm')}
+                  ${renderTableRow('Trail', 'trail', 'mm')}
+                  
+                  <!-- Front-End & Steering Specs -->
+                  <tr><td colspan="2" class="row-category">Front-End & Steering</td></tr>
+                  ${renderTableRow('Head Tube Length', 'headTubeLength', 'mm')}
+                  ${renderTableRow('Fork Length', 'forkLength', 'mm')}
+                  ${renderTableRow('Fork Rake (offset)', 'forkRake', 'mm')}
+                  ${renderTableRow('Stem Length', 'stemLength', 'mm')}
+                  ${renderTableRow('Stem Angle', 'stemAngle', '°')}
+                  ${renderTableRow('Spacers Stack', 'headsetSpacersStack', 'mm')}
+                  ${renderTableRow('Headset Top Stack', 'headsetTopStack', 'mm')}
+                  ${renderTableRow('Headset Bottom Stack', 'headsetBottomStack', 'mm')}
+
+                  <!-- Cockpit Details -->
+                  <tr><td colspan="2" class="row-category">Cockpit & Components</td></tr>
+                  ${renderTableRow('Crank Length', 'crankLength', 'mm')}
+                  ${renderTableRow('Saddle Length', 'saddleLength', 'mm')}
+                  ${renderTableRow('Saddle Stack', 'saddleStack', 'mm')}
+                  ${renderTableRow('Saddle Angle', 'saddleAngle', '°')}
+                  ${renderTableRow('Seatpost Setback', 'seatpostSetback', 'mm')}
+                  ${renderTableRow('Handlebar Diameter', 'handlebarDiameter', 'mm')}
+                  ${renderTableRow('Wheel Radius', 'wheelRadius', 'mm')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        const canvas = document.getElementById('bike-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height);
+        return;
+      }
+
+      // We have both bikes!
       detailsPanel.innerHTML = `
         <div class="comparison-container">
           <!-- Action bar with link -->
@@ -1112,8 +1206,8 @@
       const bikeA = selectedBikes[0];
       const bikeB = selectedBikes[1];
 
-      const valA = bikeA.data[key];
-      const valB = bikeB.data[key];
+      const valA = bikeA ? bikeA.data[key] : undefined;
+      const valB = bikeB ? bikeB.data[key] : undefined;
 
       if (valA === undefined && valB === undefined) {
         return ''; // Hide row if both are missing
@@ -1121,7 +1215,19 @@
 
       const displayA = valA !== undefined ? Math.round(valA * 10) / 10 : '-';
       const displayB = valB !== undefined ? Math.round(valB * 10) / 10 : '-';
+      const tdStyle = highlight ? 'font-weight: 500; color: var(--text-main);' : '';
 
+      if (bikeA && !bikeB) {
+        // Single bike mode
+        return `
+          <tr>
+            <td style="${tdStyle}">${displayName}</td>
+            <td class="val-a">${displayA}${valA !== undefined ? unit : ''}</td>
+          </tr>
+        `;
+      }
+
+      // Two bikes mode
       let diffHtml = '';
       if (valA !== undefined && valB !== undefined) {
         const diff = valB - valA;
@@ -1149,7 +1255,7 @@
 
       return `
         <tr>
-          <td style="${highlight ? 'font-weight: 500; color: var(--text-main);' : ''}">${displayName}</td>
+          <td style="${tdStyle}">${displayName}</td>
           <td class="val-a">${displayA}${valA !== undefined ? unit : ''}</td>
           <td class="val-b">${displayB}${valB !== undefined ? unit : ''}</td>
           <td>${diffHtml}</td>
