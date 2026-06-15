@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Definitions for gradients and glows -->
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#070a10" />
+    </radialGradient>
+
+    <!-- Neon Glow Gradient -->
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />  <!-- Neon Cyan -->
+      <stop offset="50%" stop-color="#8b5cf6" /> <!-- Purple -->
+      <stop offset="100%" stop-color="#ec4899" /> <!-- Neon Magenta -->
+    </linearGradient>
+
+    <!-- Cyan Gradient -->
+    <linearGradient id="cyanGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <!-- Magenta Gradient -->
+    <linearGradient id="magentaGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Soft Ambient Glow -->
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComponentTransfer in="blur" result="glow1">
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="glow1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Base Circle with glowing outline -->
+  <circle cx="256" cy="256" r="230" fill="url(#bgGrad)" stroke="url(#neonGrad)" stroke-width="12" filter="url(#softGlow)" />
+
+  <!-- Technical dotted line for bike fit vibe -->
+  <circle cx="256" cy="256" r="208" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" stroke-dasharray="8 6" />
+
+  <!-- Technical/geometric grid lines to represent bike fits (stack & reach coordinate system!) -->
+  <line x1="256" y1="50" x2="256" y2="462" stroke="rgba(255, 255, 255, 0.03)" stroke-width="2" />
+  <line x1="50" y1="256" x2="462" y2="256" stroke="rgba(255, 255, 255, 0.03)" stroke-width="2" />
+  <circle cx="256" cy="256" r="140" fill="none" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1.5" />
+
+  <!-- The stylized bicycle geometry -->
+  <!-- Lifted slightly to center the visual weight (wheels + frame) -->
+  <g transform="translate(2, 5)">
+    <!-- Rear Wheel -->
+    <!-- Stylized carbon rim -->
+    <circle cx="140" cy="285" r="72" fill="none" stroke="url(#cyanGrad)" stroke-width="14" filter="url(#glow)" />
+    <!-- Inner rim accent -->
+    <circle cx="140" cy="285" r="50" fill="none" stroke="rgba(6, 182, 212, 0.25)" stroke-width="3" />
+    <circle cx="140" cy="285" r="12" fill="#06b6d4" />
+
+    <!-- Front Wheel -->
+    <!-- Stylized carbon rim -->
+    <circle cx="372" cy="285" r="72" fill="none" stroke="url(#magentaGrad)" stroke-width="14" filter="url(#glow)" />
+    <!-- Inner rim accent -->
+    <circle cx="372" cy="285" r="50" fill="none" stroke="rgba(236, 72, 153, 0.25)" stroke-width="3" />
+    <circle cx="372" cy="285" r="12" fill="#ec4899" />
+
+    <!-- Bottom Bracket (BB) -->
+    <circle cx="232" cy="265" r="18" fill="none" stroke="url(#neonGrad)" stroke-width="6" />
+    <circle cx="232" cy="265" r="6" fill="#8b5cf6" />
+
+    <!-- Frame Geometry -->
+    <!-- Chainstay -->
+    <line x1="140" y1="285" x2="232" y2="265" stroke="url(#cyanGrad)" stroke-width="12" stroke-linecap="round" />
+    
+    <!-- Seatstay -->
+    <line x1="140" y1="285" x2="200" y2="145" stroke="url(#neonGrad)" stroke-width="10" stroke-linecap="round" />
+    
+    <!-- Seat Tube -->
+    <line x1="232" y1="265" x2="200" y2="145" stroke="url(#neonGrad)" stroke-width="12" stroke-linecap="round" />
+    
+    <!-- Downtube -->
+    <line x1="232" y1="265" x2="330" y2="165" stroke="url(#cyanGrad)" stroke-width="14" stroke-linecap="round" />
+    
+    <!-- Top Tube -->
+    <line x1="200" y1="145" x2="320" y2="125" stroke="url(#neonGrad)" stroke-width="12" stroke-linecap="round" />
+    
+    <!-- Head Tube -->
+    <line x1="330" y1="165" x2="320" y2="125" stroke="url(#magentaGrad)" stroke-width="16" stroke-linecap="round" />
+    
+    <!-- Fork -->
+    <line x1="330" y1="165" x2="372" y2="285" stroke="url(#magentaGrad)" stroke-width="12" stroke-linecap="round" />
+
+    <!-- Handlebars (Clean Drop Bars Curve) -->
+    <path d="M 320,125 L 338,113 C 352,113 362,120 362,135 C 362,150 350,158 335,158" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Saddle -->
+    <!-- Seatpost -->
+    <line x1="200" y1="145" x2="193" y2="120" stroke="#ffffff" stroke-width="10" stroke-linecap="round" />
+    <!-- Saddle shape -->
+    <path d="M 174,116 L 208,118 C 212,118 213,121 206,121 L 186,121 C 179,121 174,119 174,116 Z" fill="#ffffff" />
+  </g>
+</svg>
