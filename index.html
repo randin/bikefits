@@ -789,7 +789,13 @@
       try {
         const response = await fetch('files.json');
         if (response.ok) {
-          files = await response.json();
+          try {
+            files = await response.json();
+          } catch (jsonErr) {
+            console.error('Error parsing files.json:', jsonErr);
+            showToast('Error parsing "files.json": invalid JSON', true);
+            files = FALLBACK_FILES;
+          }
         } else {
           files = FALLBACK_FILES;
         }
@@ -803,12 +809,19 @@
         try {
           const res = await fetch(fileName);
           if (res.ok) {
-            const data = await res.json();
-            return {
-              fileName: fileName,
-              name: data.name || fileName.split('/').pop().replace('.json', ''),
-              data: data
-            };
+            try {
+              const data = await res.json();
+              return {
+                fileName: fileName,
+                name: data.name || fileName.split('/').pop().replace('.json', ''),
+                data: data
+              };
+            } catch (jsonErr) {
+              console.error(`Error parsing ${fileName}:`, jsonErr);
+              showToast(`Error parsing "${fileName}": invalid JSON`, true);
+            }
+          } else {
+            console.error(`Error loading ${fileName}: status ${res.status}`);
           }
         } catch (e) {
           console.error(`Error loading ${fileName}:`, e);
@@ -1483,6 +1496,7 @@
       });
     }
 
+    let toastTimeout;
     // Toast show helper
     function showToast(message, isError = false) {
       const toast = document.getElementById('toast');
@@ -1492,14 +1506,19 @@
       toastMsg.innerText = message;
       if (isError) {
         toastIcon.style.fill = '#f87171';
+        toastIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>';
       } else {
         toastIcon.style.fill = '#34d399';
+        toastIcon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
       }
 
       toast.classList.add('show');
-      setTimeout(() => {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+      toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, isError ? 5000 : 3000);
     }
 
     // Utility escape html
