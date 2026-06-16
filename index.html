@@ -1066,6 +1066,8 @@
         const saddleBackY = getVal('saddleTopY');
         const r = getVal('wheelRadius');
 
+        const saddleToBarDrop = saddleBackY - hbY;
+
         const xVals = [bbX, rHubX - r, rHubX + r, fHubX - r, fHubX + r, stTopX, htTopX, htBotX, hbX, hoodsX, saddleBackX];
         const yVals = [bbY, rHubY + r, fHubY + r, stTopY, htTopY, htBotY, hbY, hoodsY, saddleBackY];
 
@@ -1133,6 +1135,7 @@
                   <tr><td colspan="2" class="row-category">Core Fit specs</td></tr>
                   ${renderTableRow('Stack', 'stack', 'mm', true)}
                   ${renderTableRow('Reach', 'reach', 'mm', true)}
+                  ${renderTableRow('Saddle to Bar Drop', 'saddleToBarDrop', 'mm', true)}
                   ${renderTableRow('Saddle Top Height (Y)', 'saddleTopY', 'mm', true)}
                   ${renderTableRow('Saddle Back setback (X)', 'saddleBackX', 'mm', true)}
                   ${renderTableRow('Handlebar Back clamp (X)', 'handlebarBackX', 'mm', true)}
