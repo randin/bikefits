@@ -7,12 +7,12 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="shortcut icon" href="favicon.ico">
-  
+
   <!-- Google Fonts: Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #090d16, #111827, #070a10);
@@ -20,12 +20,12 @@
       --panel-border: rgba(255, 255, 255, 0.08);
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
-      
+
       --color-bike-a: #06b6d4; /* Neon Cyan */
       --color-bike-a-glow: rgba(6, 182, 212, 0.15);
       --color-bike-b: #ec4899; /* Neon Magenta */
       --color-bike-b-glow: rgba(236, 72, 153, 0.15);
-      
+
       --accent-glowing: linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899);
       --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -856,7 +856,7 @@
           try {
             const data = JSON.parse(e.target.result);
             const name = data.name || file.name.replace('.json', '');
-            
+
             // Avoid duplicates
             const existingIdx = bikeConfigs.findIndex(b => b.name.toLowerCase() === name.toLowerCase());
             const newConfig = {
@@ -865,16 +865,16 @@
               data: data,
               isUploaded: true
             };
-            
+
             if (existingIdx !== -1) {
               bikeConfigs[existingIdx] = newConfig;
             } else {
               bikeConfigs.push(newConfig);
             }
-            
+
             showToast(`Loaded "${name}"`);
             renderBikeList();
-            
+
             // Automatically select the newly loaded bike
             selectBike(newConfig);
           } catch (err) {
@@ -888,7 +888,7 @@
     // Render configuration list
     function renderBikeList(query = '') {
       bikeListEl.innerHTML = '';
-      const filtered = bikeConfigs.filter(b => 
+      const filtered = bikeConfigs.filter(b =>
         b.name.toLowerCase().includes(query.toLowerCase()) ||
         b.fileName.toLowerCase().includes(query.toLowerCase())
       );
@@ -902,7 +902,7 @@
         const item = document.createElement('div');
         item.className = 'bike-item';
         item.dataset.filename = bike.fileName;
-        
+
         const isSelectedA = selectedBikes[0] && selectedBikes[0].fileName === bike.fileName;
         const isSelectedB = selectedBikes[1] && selectedBikes[1].fileName === bike.fileName;
 
@@ -970,7 +970,7 @@
       items.forEach(item => {
         const fn = item.dataset.filename;
         item.className = 'bike-item';
-        
+
         const isSelectedA = selectedBikes[0] && selectedBikes[0].fileName === fn;
         const isSelectedB = selectedBikes[1] && selectedBikes[1].fileName === fn;
 
@@ -996,7 +996,7 @@
     // Generate BikeGeoCalc URL
     function generateBikeGeoCalcUrl() {
       let url = 'https://www.bikegeocalc.com/#';
-      
+
       selectedBikes.forEach(bike => {
         if (!bike) return;
         const data = bike.data;
@@ -1066,8 +1066,6 @@
         const saddleBackY = getVal('saddleTopY');
         const r = getVal('wheelRadius');
 
-        const saddleToBarDrop = saddleBackY - hbY;
-
         const xVals = [bbX, rHubX - r, rHubX + r, fHubX - r, fHubX + r, stTopX, htTopX, htBotX, hbX, hoodsX, saddleBackX];
         const yVals = [bbY, rHubY + r, fHubY + r, stTopY, htTopY, htBotY, hbY, hoodsY, saddleBackY];
 
@@ -1101,7 +1099,7 @@
                 </div>
                 <canvas id="bike-canvas" width="800" height="500"></canvas>
               </div>
-              
+
               <!-- Action bar with link -->
               <div class="action-bar">
                 <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Open in BikeGeoCalc</h4>
@@ -1151,7 +1149,7 @@
                   ${renderTableRow('Chainstay Length', 'chainStayLength', 'mm')}
                   ${renderTableRow('Wheelbase', 'wheelBase', 'mm')}
                   ${renderTableRow('Trail', 'trail', 'mm')}
-                  
+
                   <!-- Front-End & Steering Specs -->
                   <tr><td colspan="2" class="row-category">Front-End & Steering</td></tr>
                   ${renderTableRow('Head Tube Length', 'headTubeLength', 'mm')}
@@ -1198,7 +1196,7 @@
               </div>
               <canvas id="bike-canvas" width="800" height="500"></canvas>
             </div>
-            
+
             <!-- Action bar with link -->
             <div class="action-bar">
               <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;">Compare in BikeGeoCalc</h4>
@@ -1250,7 +1248,7 @@
                 ${renderTableRow('Chainstay Length', 'chainStayLength', 'mm')}
                 ${renderTableRow('Wheelbase', 'wheelBase', 'mm')}
                 ${renderTableRow('Trail', 'trail', 'mm')}
-                
+
                 <!-- Front-End & Steering Specs -->
                 <tr><td colspan="4" class="row-category">Front-End & Steering</td></tr>
                 ${renderTableRow('Head Tube Length', 'headTubeLength', 'mm')}
@@ -1280,7 +1278,7 @@
       // Trigger canvas draw
       const canvas = document.getElementById('bike-canvas');
       const ctx = canvas.getContext('2d');
-      
+
       // Draw Bike A and Bike B overlayed
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBike(ctx, bikeA.data, '#06b6d4', canvas.width, canvas.height, bounds); // cyan
@@ -1292,8 +1290,17 @@
       const bikeA = selectedBikes[0];
       const bikeB = selectedBikes[1];
 
-      const valA = bikeA ? bikeA.data[key] : undefined;
-      const valB = bikeB ? bikeB.data[key] : undefined;
+      let valA = bikeA ? bikeA.data[key] : undefined;
+      let valB = bikeB ? bikeB.data[key] : undefined;
+
+      if (bikeA && key == 'saddleToBarDrop') {
+        if (bikeA.data['saddleTopY'] && bikeA.data['handlebarTopY'])
+          valA = bikeA.data['saddleTopY'] - bikeA.data['handlebarTopY'];
+      }
+      if (bikeB && key == 'saddleToBarDrop') {
+        if (bikeB.data['saddleTopY'] && bikeB.data['handlebarTopY'])
+          valB = bikeB.data['saddleTopY'] - bikeB.data['handlebarTopY'];
+      }
 
       if (valA === undefined && valB === undefined) {
         return ''; // Hide row if both are missing
@@ -1328,11 +1335,11 @@
           } else if (key === 'reach' || key === 'wheelBase' || key === 'chainStayLength') {
             relText = diff > 0 ? 'longer' : 'shorter';
           }
-          
+
           const suffix = relText ? ` (${relText})` : '';
           const diffSign = diff > 0 ? `+${absDiff}` : `-${absDiff}`;
           const badgeClass = diff > 0 ? 'diff-positive' : 'diff-negative';
-          
+
           diffHtml = `<span class="diff-badge ${badgeClass}">${diffSign}${unit}${suffix}</span>`;
         }
       } else {
@@ -1373,7 +1380,7 @@
       if (color === '#06b6d4') {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
         ctx.lineWidth = 1;
-        
+
         // Draw vertical grid lines at 100mm increments
         const startGridX = Math.floor(minX / 100) * 100;
         for (let x = startGridX; x < maxX; x += 100) {
@@ -1382,7 +1389,7 @@
           ctx.lineTo(toCanvasX(x), toCanvasY(maxY));
           ctx.stroke();
         }
-        
+
         // Draw horizontal grid lines at 100mm increments
         for (let y = 100; y < maxY; y += 100) {
           ctx.beginPath();
