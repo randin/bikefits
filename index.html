@@ -594,6 +594,34 @@
     .clear-btn:hover {
       color: #f87171;
     }
+
+    /* GitHub edit link */
+    .edit-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .edit-link:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: #6366f1;
+      color: #818cf8;
+    }
+
+    .edit-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
   </style>
 </head>
 <body>
@@ -921,7 +949,20 @@
         item.innerHTML = `
           <div class="bike-item-header">
             <span class="bike-name">${escapeHtml(bike.name)}</span>
-            ${badgeHtml}
+            <div class="bike-item-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+              ${badgeHtml}
+              ${!bike.isUploaded ? `
+                <a href="https://github.com/randin/bikefits/edit/main/${bike.fileName}" 
+                   target="_blank" 
+                   class="edit-link" 
+                   title="Edit on GitHub"
+                   onclick="event.stopPropagation();">
+                  <svg class="edit-icon" viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                </a>
+              ` : ''}
+            </div>
           </div>
           <div class="bike-item-details">
             <span>Stack: ${stack}</span>
@@ -977,14 +1018,16 @@
         if (isSelectedA) item.classList.add('selected-a');
         if (isSelectedB) item.classList.add('selected-b');
 
-        const header = item.querySelector('.bike-item-header');
-        let badge = header.querySelector('.bike-badge');
-        if (badge) badge.remove();
+        const actionsContainer = item.querySelector('.bike-item-actions');
+        if (actionsContainer) {
+          let badge = actionsContainer.querySelector('.bike-badge');
+          if (badge) badge.remove();
 
-        if (isSelectedA) {
-          header.insertAdjacentHTML('beforeend', `<span class="bike-badge badge-a">Bike A</span>`);
-        } else if (isSelectedB) {
-          header.insertAdjacentHTML('beforeend', `<span class="bike-badge badge-b">Bike B</span>`);
+          if (isSelectedA) {
+            actionsContainer.insertAdjacentHTML('afterbegin', `<span class="bike-badge badge-a">Bike A</span>`);
+          } else if (isSelectedB) {
+            actionsContainer.insertAdjacentHTML('afterbegin', `<span class="bike-badge badge-b">Bike B</span>`);
+          }
         }
       });
 
@@ -1111,6 +1154,12 @@
                     <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
                     Open BikeGeoCalc
                   </button>
+                  ${!bikeA.isUploaded ? `
+                    <button class="btn btn-secondary" onclick="window.open('https://github.com/randin/bikefits/edit/main/${bikeA.fileName}', '_blank')">
+                      <svg class="btn-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                      Edit on GitHub
+                    </button>
+                  ` : ''}
                   <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
                     <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                     Copy Link
@@ -1125,7 +1174,21 @@
                 <thead>
                   <tr>
                     <th>Geometry Dimension</th>
-                    <th class="val-a">${escapeHtml(bikeA.name)}</th>
+                    <th class="val-a">
+                      <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <span>${escapeHtml(bikeA.name)}</span>
+                        ${!bikeA.isUploaded ? `
+                          <a href="https://github.com/randin/bikefits/edit/main/${bikeA.fileName}" 
+                             target="_blank" 
+                             class="edit-link" 
+                             title="Edit on GitHub">
+                            <svg class="edit-icon" viewBox="0 0 24 24">
+                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                          </a>
+                        ` : ''}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1208,6 +1271,16 @@
                   <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
                   Open BikeGeoCalc
                 </button>
+                ${!bikeA.isUploaded ? `
+                  <button class="btn btn-secondary" onclick="window.open('https://github.com/randin/bikefits/edit/main/${bikeA.fileName}', '_blank')">
+                    Edit A on GitHub
+                  </button>
+                ` : ''}
+                ${!bikeB.isUploaded ? `
+                  <button class="btn btn-secondary" onclick="window.open('https://github.com/randin/bikefits/edit/main/${bikeB.fileName}', '_blank')">
+                    Edit B on GitHub
+                  </button>
+                ` : ''}
                 <button class="btn btn-secondary" onclick="copyUrlToClipboard()">
                   <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                   Copy Link
@@ -1222,8 +1295,36 @@
               <thead>
                 <tr>
                   <th>Geometry Dimension</th>
-                  <th class="val-a">${escapeHtml(bikeA.name)}</th>
-                  <th class="val-b">${escapeHtml(bikeB.name)}</th>
+                  <th class="val-a">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                      <span>${escapeHtml(bikeA.name)}</span>
+                      ${!bikeA.isUploaded ? `
+                        <a href="https://github.com/randin/bikefits/edit/main/${bikeA.fileName}" 
+                           target="_blank" 
+                           class="edit-link" 
+                           title="Edit on GitHub">
+                          <svg class="edit-icon" viewBox="0 0 24 24">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                          </svg>
+                        </a>
+                      ` : ''}
+                    </div>
+                  </th>
+                  <th class="val-b">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                      <span>${escapeHtml(bikeB.name)}</span>
+                      ${!bikeB.isUploaded ? `
+                        <a href="https://github.com/randin/bikefits/edit/main/${bikeB.fileName}" 
+                           target="_blank" 
+                           class="edit-link" 
+                           title="Edit on GitHub">
+                          <svg class="edit-icon" viewBox="0 0 24 24">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                          </svg>
+                        </a>
+                      ` : ''}
+                    </div>
+                  </th>
                   <th>Difference</th>
                 </tr>
               </thead>
