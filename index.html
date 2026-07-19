@@ -1199,6 +1199,7 @@
                   <tr><td colspan="2" class="row-category">Core Fit specs</td></tr>
                   ${renderTableRow('Stack', 'stack', 'mm', true)}
                   ${renderTableRow('Reach', 'reach', 'mm', true)}
+                  ${renderTableRow('Setback', 'saddleFrontToBB', 'mm', true)}
                   ${renderTableRow('Saddle to Bar Drop', 'saddleToBarDrop', 'mm', true)}
                   ${renderTableRow('Saddle Top Height (Y)', 'saddleTopY', 'mm', true)}
                   ${renderTableRow('Saddle Back setback (X)', 'saddleBackX', 'mm', true)}
@@ -1336,6 +1337,7 @@
                 <tr><td colspan="4" class="row-category">Core Fit specs</td></tr>
                 ${renderTableRow('Stack', 'stack', 'mm', true)}
                 ${renderTableRow('Reach', 'reach', 'mm', true)}
+                ${renderTableRow('Setback', 'saddleFrontToBB', 'mm', true)}
                 ${renderTableRow('Saddle to Bar Drop', 'saddleToBarDrop', 'mm', true)}
                 ${renderTableRow('Saddle Top Height (Y)', 'saddleTopY', 'mm', true)}
                 ${renderTableRow('Saddle Back setback (X)', 'saddleBackX', 'mm', true)}
@@ -1404,6 +1406,25 @@
       if (bikeB && key == 'saddleToBarDrop') {
         if (bikeB.data['saddleTopY'] && bikeB.data['handlebarTopY'])
           valB = bikeB.data['saddleTopY'] - bikeB.data['handlebarTopY'];
+      }
+
+      if (bikeA && key === 'saddleFrontToBB') {
+        const getValA = (k) => bikeA.data[k] !== undefined ? bikeA.data[k] : DEFAULT_GEOMETRY[k];
+        const bbX = getValA('bottomBracketX');
+        const saddleBackX = getValA('saddleBackX');
+        const saddleLen = getValA('saddleLength');
+        const saddleAngleRad = (getValA('saddleAngle') * Math.PI) / 180;
+        const saddleFrontX = saddleBackX + saddleLen * Math.cos(saddleAngleRad);
+        valA = bbX - saddleFrontX;
+      }
+      if (bikeB && key === 'saddleFrontToBB') {
+        const getValB = (k) => bikeB.data[k] !== undefined ? bikeB.data[k] : DEFAULT_GEOMETRY[k];
+        const bbX = getValB('bottomBracketX');
+        const saddleBackX = getValB('saddleBackX');
+        const saddleLen = getValB('saddleLength');
+        const saddleAngleRad = (getValB('saddleAngle') * Math.PI) / 180;
+        const saddleFrontX = saddleBackX + saddleLen * Math.cos(saddleAngleRad);
+        valB = bbX - saddleFrontX;
       }
 
       if (valA === undefined && valB === undefined) {
